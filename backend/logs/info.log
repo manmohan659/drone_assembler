@@ -1,0 +1,223 @@
+[2025-02-21T07:05:44.787Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efft58-edud"}
+[2025-02-21T07:05:44.789Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efft58-edud"}
+[2025-02-21T07:05:59.375Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efft58-edud"}
+[2025-02-21T07:05:59.375Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efft58-edud"}
+[2025-02-21T07:06:18.792Z] INFO: [ValidateAssembly] Processing request for step 1 {"hasImage":true,"timestamp":"2025-02-21T07:06:18.792Z"}
+[2025-02-21T07:06:18.793Z] INFO: [ValidateAssembly] Preparing Gemini model request {}
+[2025-02-21T07:06:18.793Z] INFO: [ValidateAssembly] Sending request to Gemini API {}
+[2025-02-21T07:06:21.214Z] INFO: [ValidateAssembly] Received response from Gemini API: "```json\n{\n  \"status\": \"error\",\n  \"feedback\": \"The image is too blurry and obstructed to provide any ..."
+[2025-02-21T07:06:21.215Z] INFO: [ValidateAssembly] Cleaned response: "{\n  \"status\": \"error\",\n  \"feedback\": \"The image is too blurry and obstructed to provide any meaningf..."
+[2025-02-21T07:06:21.215Z] INFO: [ValidateAssembly] Successfully parsed JSON response {}
+[2025-02-21T07:06:21.215Z] INFO: [ValidateAssembly] Sending successful response to client {}
+[2025-02-21T07:06:47.447Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:06:47.448Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:06:57.783Z] INFO: Getting or creating project {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","projectName":"Drone Project 2/20/2025"}
+[2025-02-21T07:06:57.784Z] INFO: Getting or creating project {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:06:57.983Z] INFO: Created new project {"projectId":"proj-m7efhdgd-127v","name":"Drone Project 2/20/2025"}
+[2025-02-21T07:06:57.991Z] INFO: Updating drone type {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","droneType":"FPV Drone"}
+[2025-02-21T07:06:57.992Z] INFO: Updating drone type {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","droneType":"FPV Drone"}
+[2025-02-21T07:06:58.079Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:06:58.079Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:07:06.185Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":3,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:07:06.185Z"}
+[2025-02-21T07:07:06.185Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:07:06.295Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:07:06.295Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:07:06.295Z] INFO: [VoiceQuery] User query: "hey"
+[2025-02-21T07:07:06.295Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:07:08.420Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Hey there! Looks like you have a Raspberry Pi. Ready t..."
+[2025-02-21T07:07:08.421Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Hey there! Looks like you have a Raspberry Pi. Ready to get st..."
+[2025-02-21T07:07:08.421Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:07:08.421Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:07:37.601Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:07:37.601Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":66,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:07:37.601Z"}
+[2025-02-21T07:07:37.711Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:07:37.711Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:07:37.711Z] INFO: [VoiceQuery] User query: "can you name all the important components inside this Raspberry Pi"
+[2025-02-21T07:07:37.711Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:07:40.267Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Okay, I see the Raspberry Pi! Key components visible a..."
+[2025-02-21T07:07:40.267Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Okay, I see the Raspberry Pi! Key components visible are: the ..."
+[2025-02-21T07:07:40.267Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:07:40.267Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:08:38.614Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":28,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:08:38.614Z"}
+[2025-02-21T07:08:38.614Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:08:38.724Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:08:38.723Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:08:38.724Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:08:38.724Z] INFO: [VoiceQuery] User query: "so what do you think of this"
+[2025-02-21T07:08:40.920Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"It looks like you've got the frame ready! Is that the FPV dron..."
+[2025-02-21T07:08:40.920Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"It looks like you've got the frame ready! Is that the ..."
+[2025-02-21T07:08:40.920Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:08:40.920Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:08:59.992Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":28,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:08:59.992Z"}
+[2025-02-21T07:08:59.992Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:00.078Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:00.079Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:09:00.079Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:09:00.079Z] INFO: [VoiceQuery] User query: "this is my this is my friend"
+[2025-02-21T07:09:02.292Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"I see the drone frame you're working with. Is there so..."
+[2025-02-21T07:09:02.293Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:09:02.293Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:09:02.292Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"I see the drone frame you're working with. Is there something ..."
+[2025-02-21T07:09:11.792Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":82,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:09:11.792Z"}
+[2025-02-21T07:09:11.793Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:11.884Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:09:11.884Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:11.884Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:09:11.884Z] INFO: [VoiceQuery] User query: "so this is my actual drone frame can you name the frame what kind of frame is this"
+[2025-02-21T07:09:14.067Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"It appears to be an X frame, but can't name the frame ..."
+[2025-02-21T07:09:14.068Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"It appears to be an X frame, but can't name the frame without ..."
+[2025-02-21T07:09:14.068Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:09:14.068Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:09:31.808Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:31.807Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":58,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:09:31.807Z"}
+[2025-02-21T07:09:31.897Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:31.897Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:09:31.898Z] INFO: [VoiceQuery] User query: "and what about this what is this is not working on Netflix"
+[2025-02-21T07:09:31.898Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:09:34.139Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"warning\",\n  \"answer\": \"It seems like you're trying to view a video. Unfortuna..."
+[2025-02-21T07:09:34.141Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:09:34.141Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:09:34.141Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"warning\",\n  \"answer\": \"It seems like you're trying to view a video. Unfortunately, I'..."
+[2025-02-21T07:09:42.245Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":57,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:09:42.245Z"}
+[2025-02-21T07:09:42.245Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:42.336Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:09:42.336Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:09:42.336Z] INFO: [VoiceQuery] User query: "what is this can you name this part what is this used for"
+[2025-02-21T07:09:42.336Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:09:44.172Z] INFO: [VoiceQuery] Received response from Gemini API: "{\n  \"status\": \"success\",\n  \"answer\": \"That looks like a 30A ESC (Electronic Speed Controller). It co..."
+[2025-02-21T07:09:44.172Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"That looks like a 30A ESC (Electronic Speed Controller). It co..."
+[2025-02-21T07:09:44.173Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:09:44.173Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:10:29.821Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:10:29.822Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:11:05.771Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:11:05.772Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:11:41.224Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":224,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v","timestamp":"2025-02-21T07:11:41.224Z"}
+[2025-02-21T07:11:41.224Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:11:41.445Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efhdgd-127v"}
+[2025-02-21T07:11:41.446Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:11:41.446Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:11:41.446Z] INFO: [VoiceQuery] User query: "can you like identify the components and store them in the database because I think the code has this postgres not something but like super wings as a database so like just store in the database this that I have Raspberry Pi"
+[2025-02-21T07:11:43.469Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Okay, I've identified a Raspberry Pi. I'll store that ..."
+[2025-02-21T07:11:43.469Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Okay, I've identified a Raspberry Pi. I'll store that in the d..."
+[2025-02-21T07:11:43.469Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:11:43.469Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:12:11.253Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:11.254Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:25.859Z] INFO: Getting or creating project {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","projectName":"Drona"}
+[2025-02-21T07:12:25.859Z] INFO: Getting or creating project {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:12:26.017Z] INFO: Created new project {"projectId":"proj-m7efoem4-973f","name":"Drona"}
+[2025-02-21T07:12:26.022Z] INFO: Updating drone type {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","droneType":"FPV Drone"}
+[2025-02-21T07:12:26.022Z] INFO: Updating drone type {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","droneType":"FPV Drone"}
+[2025-02-21T07:12:26.096Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:26.096Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:27.703Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:27.703Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:12:37.719Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":39,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:12:37.719Z"}
+[2025-02-21T07:12:37.720Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:12:37.795Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:12:37.794Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:12:37.795Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:12:37.795Z] INFO: [VoiceQuery] User query: "hey can you help me with drone assembly"
+[2025-02-21T07:12:39.482Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Sure, I can definitely help! What's the first step you..."
+[2025-02-21T07:12:39.482Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:12:39.482Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:12:39.482Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Sure, I can definitely help! What's the first step you're stuc..."
+[2025-02-21T07:12:53.432Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":2,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:12:53.432Z"}
+[2025-02-21T07:12:53.432Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:12:53.519Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:12:53.519Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:12:53.519Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:12:53.519Z] INFO: [VoiceQuery] User query: "so"
+[2025-02-21T07:12:55.767Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Okay, let's get started!\",\n  \"details\": \"At step 1, we..."
+[2025-02-21T07:12:55.767Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:12:55.767Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Okay, let's get started!\",\n  \"details\": \"At step 1, we'll begi..."
+[2025-02-21T07:12:55.767Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:13:51.911Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:13:51.911Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":150,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:13:51.911Z"}
+[2025-02-21T07:13:52.158Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:13:52.159Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:13:52.159Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:13:52.159Z] INFO: [VoiceQuery] User query: "so I have this as a friend if you can see this I have four Motors attached to it and there is this particular component as well so I have these things"
+[2025-02-21T07:13:54.031Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Yes, I can see the drone frame and the motors attached..."
+[2025-02-21T07:13:54.031Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Yes, I can see the drone frame and the motors attached to it, ..."
+[2025-02-21T07:13:54.032Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:13:54.033Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:14:30.383Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:14:30.383Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":22,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:14:30.383Z"}
+[2025-02-21T07:14:30.481Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:14:30.481Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:14:30.481Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:14:30.481Z] INFO: [VoiceQuery] User query: "how old is Tyler Texas"
+[2025-02-21T07:14:32.208Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Tyler, Texas was founded in 1846, so it is about 178 y..."
+[2025-02-21T07:14:32.208Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Tyler, Texas was founded in 1846, so it is about 178 years old..."
+[2025-02-21T07:14:32.209Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:14:32.209Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:14:36.921Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:14:36.920Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":34,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:14:36.920Z"}
+[2025-02-21T07:14:37.001Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:14:37.002Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:14:37.002Z] INFO: [VoiceQuery] User query: "I have this as well can you see it"
+[2025-02-21T07:14:37.002Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:14:38.698Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Yes, I can see it. It appears to be a Raspberry Pi boa..."
+[2025-02-21T07:14:38.698Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Yes, I can see it. It appears to be a Raspberry Pi board.\",\n  ..."
+[2025-02-21T07:14:38.698Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:14:38.698Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:14:58.427Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:14:58.427Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:15:08.240Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:15:08.242Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:15:11.573Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:15:11.573Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:15:16.530Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:15:16.530Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:17:07.041Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:17:07.041Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:19:13.632Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:19:13.632Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:19:50.587Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":148,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:19:50.587Z"}
+[2025-02-21T07:19:50.587Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:19:50.697Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:19:50.698Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:19:50.698Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:19:50.698Z] INFO: [VoiceQuery] User query: "hey can you hear me and this is the component that I have so like can you insert name what's the component don't be very like this short description"
+[2025-02-21T07:19:52.414Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:19:52.413Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"Yep, I can hear you! That looks like a Raspberry Pi to..."
+[2025-02-21T07:19:52.413Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"Yep, I can hear you! That looks like a Raspberry Pi to me.\",\n ..."
+[2025-02-21T07:19:52.413Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:20:10.715Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":67,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:20:10.715Z"}
+[2025-02-21T07:20:10.716Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:20:10.861Z] INFO: [VoiceQuery] User query: "what about this can you can you see this what kind of frame is this"
+[2025-02-21T07:20:10.861Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:20:10.861Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:20:10.861Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:20:12.554Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"That looks like a quadcopter frame.\",\n  \"details\": \"Th..."
+[2025-02-21T07:20:12.555Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"That looks like a quadcopter frame.\",\n  \"details\": \"The frame ..."
+[2025-02-21T07:20:12.555Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:20:12.555Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:20:36.567Z] INFO: [VoiceQuery] Processing request for step 1 {"hasImage":true,"queryLength":25,"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f","timestamp":"2025-02-21T07:20:36.567Z"}
+[2025-02-21T07:20:36.567Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:20:36.684Z] INFO: [VoiceQuery] Preparing Gemini model request {}
+[2025-02-21T07:20:36.684Z] INFO: [VoiceQuery] Retrieved project context {"projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:20:36.685Z] INFO: [VoiceQuery] User query: "what do you think of this"
+[2025-02-21T07:20:36.684Z] INFO: [VoiceQuery] Sending request to Gemini API with prompt and image {}
+[2025-02-21T07:20:39.316Z] INFO: [VoiceQuery] Cleaned response: "{\n  \"status\": \"success\",\n  \"answer\": \"It looks like you are holding the ESC (Electronic Speed Contro..."
+[2025-02-21T07:20:39.316Z] INFO: [VoiceQuery] Received response from Gemini API: "```json\n{\n  \"status\": \"success\",\n  \"answer\": \"It looks like you are holding the ESC (Electronic Spee..."
+[2025-02-21T07:20:39.316Z] INFO: [VoiceQuery] Successfully parsed JSON response {}
+[2025-02-21T07:20:39.316Z] INFO: [VoiceQuery] Sending successful response to client {}
+[2025-02-21T07:20:59.553Z] INFO: Getting user projects {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:20:59.555Z] INFO: Getting projects for user {"userId":"dbtfz8-m7efft58-vhclobta"}
+[2025-02-21T07:45:27.480Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:45:27.482Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:45:27.597Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T07:45:27.597Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T07:56:27.056Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T07:56:27.057Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T08:08:19.082Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T08:08:19.082Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T08:08:19.568Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T08:08:19.568Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T08:17:02.257Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T08:17:02.258Z] INFO: Getting project context {"userId":"ciid2c-m7eguvpx-n2b2ih2x","projectId":"proj-m7eguvpz-s86q"}
+[2025-02-21T08:17:02.565Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
+[2025-02-21T08:17:02.566Z] INFO: Getting project context {"userId":"dbtfz8-m7efft58-vhclobta","projectId":"proj-m7efoem4-973f"}
