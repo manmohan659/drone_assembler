@@ -44,7 +44,7 @@ const MainInterface = () => {
   const currentStep = currentProject?.current_step || 1;
 
   const isVisualizationRequest = (transcript) => {
-    // Expanded list of triggers for image generation/visualization
+    // Simple function to detect if transcript is requesting an image visualization
     const visualizationTriggers = [
       /create.*image/i,
       /generate.*image/i,
@@ -156,226 +156,221 @@ const MainInterface = () => {
     }
   };
 // Fixed storeIdentifiedComponents function for MainInterface.js
-  const storeIdentifiedComponents = async (components) => {
-    if (!components || !Array.isArray(components) || components.length === 0) {
-      console.log("[DEBUG] Invalid components to store:", components);
-      return;
-    }
-    
-    console.log("[DEBUG] Calling addComponents with:", components);
-    try {
-      Logger.info('Storing identified components', { count: components.length });
-      const result = await addComponents(components); // Capture the return value
-      console.log("[DEBUG] addComponents returned:", result);
-    } catch (error) {
-      Logger.error('Error storing components', error);
-      console.error("[DEBUG] Error in storeIdentifiedComponents:", error);
-    }
-  };
+const storeIdentifiedComponents = async (components) => {
+  if (!currentProject) {
+    console.error("[DEBUG] Missing current project:", currentProject);
+    return;
+  }
   
-// Updated image generation function with reduced polling and better waiting
-const generateStableDiffusionImage = async (prompt) => {
+  const projectId = currentProject.project_id || currentProject.id;
+  if (!projectId) {
+    console.error("[DEBUG] Missing project ID in currentProject:", currentProject);
+    return;
+  }
+  
+  console.log("[DEBUG] Calling addComponents with:", components);
   try {
-    setIsGeneratingImage(true);
-    setImageGenerationError(null);
-    
-    Logger.info('Starting image generation', { prompt });
-    console.log("[DEBUG] Image generation prompt:", prompt);
-    
-    // First check if the service is running
-    try {
-      const healthCheck = await fetch('http://localhost:9999', { 
-        method: 'GET',
-        signal: AbortSignal.timeout(2000)
-      });
+    Logger.info('Storing identified components', { count: components.length });
+    const result = await addComponents(components); // Capture the return value
+    console.log("[DEBUG] addComponents returned:", result);
+  } catch (error) {
+    Logger.error('Error storing components', error);
+    console.error("[DEBUG] Error in storeIdentifiedComponents:", error);
+  }
+};
+  
+  // const generateStableDiffusionImage = async (prompt) => {
+  //   try {
+  //     setIsGeneratingImage(true);
+  //     setImageGenerationError(null);
+  //     setProcessingStatus("Starting image generation...");
       
-      if (healthCheck.ok) {
-        console.log("[DEBUG] Image service is running");
-      }
-    } catch (e) {
-      console.log("[DEBUG] Service health check failed, attempting to generate anyway");
-    }
-    
-    // Start the async image generation
-    const response = await fetch('http://localhost:9999/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        userId: getUserId(),
-        projectId: getProjectId(),
-        async: true  // Enable async processing
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to start image generation: ${response.status} ${response.statusText}`);
-    }
+  //     Logger.info('Starting image generation', { prompt });
+      
+  //     // Notify user about the process starting
+  //     if (cameraFeedRef.current?.setSpeechText) {
+  //       cameraFeedRef.current.setSpeechText(
+  //         "I'm generating a visualization based on your request. This may take a minute or two."
+  //       );
+  //     }
+      
+  //     setProcessingStatus("Generating image... (this may take 1-2 minutes)");
+      
+  //     const response = await fetch('http://localhost:5003/api/assembly/visualize', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         prompt: prompt,
+  //         userId: getUserId(),
+  //         projectId: getProjectId()
+  //       }),
+  //       // Use a longer timeout for model loading
+  //       signal: AbortSignal.timeout(300000) // 5 minute timeout
+  //     });
+      
+  //     // Handle response - check content type first
+  //     const contentType = response.headers.get('content-type');
+      
+  //     // For image content type (successful image generation)
+  //     if (contentType && contentType.includes('image/')) {
+  //       if (generatedImage) {
+  //         URL.revokeObjectURL(generatedImage);
+  //       }
+        
+  //       const blob = await response.blob();
+  //       const imageUrl = URL.createObjectURL(blob);
+  //       setGeneratedImage(imageUrl);
+        
+  //       if (cameraFeedRef.current?.setSpeechText) {
+  //         cameraFeedRef.current.setSpeechText(
+  //           "I've completed generating the visualization based on your request."
+  //         );
+  //       }
+  //     }
+  //     // For JSON content type (likely an error)
+  //     else if (contentType && contentType.includes('json')) {
+  //       const responseData = await response.json();
+        
+  //       if (!responseData.success || responseData.error) {
+  //         throw new Error(responseData.error || "Unknown error generating image");
+  //       }
+  //     } 
+  //     // For non-ok responses
+  //     else if (!response.ok) {
+  //       throw new Error(`Failed to generate image: ${response.status} ${response.statusText}`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Image generation error:", error);
+  //     setImageGenerationError(`Error: ${error.message}`);
+  //     Logger.error('Error generating image:', error);
+      
+  //     if (cameraFeedRef.current?.setSpeechText) {
+  //       cameraFeedRef.current.setSpeechText(
+  //         "I encountered an error while trying to generate the visualization."
+  //       );
+  //     }
+  //   } finally {
+  //     setProcessingStatus(null);
+  //     setIsGeneratingImage(false);
+  //   }
+  // };
 
-    // Get the task info from the response
-    const taskInfo = await response.json();
-    console.log("[DEBUG] Image generation task started:", taskInfo);
-    
-    if (!taskInfo.task_id) {
-      throw new Error("No task ID returned from image generation service");
-    }
-    
-    // Add success message to speech about generation starting
-    if (cameraFeedRef.current?.setSpeechText) {
-      cameraFeedRef.current.setSpeechText(
-        "I'm generating a visualization based on your request. This may take several minutes. Please wait for it to complete."
-      );
-    }
-    
-    // Add a delay before starting to poll to give the server time to initiate the task
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    
-    // Start polling for progress but with a much lower frequency
-    const taskId = taskInfo.task_id;
-    let isComplete = false;
-    let lastProgressUpdate = 0;
-    
-    // Set up longer polling intervals - now we poll every 10 seconds instead of every second
-    const POLLING_INTERVAL = 10000; // 10 seconds between polls
-    const MAX_WAIT_TIME = 30 * 60 * 1000; // 30 minutes maximum wait time
-    const startTime = Date.now();
-    
-    while (!isComplete && (Date.now() - startTime < MAX_WAIT_TIME)) {
-      try {
-        console.log(`[DEBUG] Polling for progress: ${taskId}`);
-        setProcessingStatus("Waiting for image generation to complete...");
-        
-        const progressResponse = await fetch(`http://localhost:9999/progress/${taskId}`, {
-          signal: AbortSignal.timeout(8000), // Longer timeout for progress checks
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        
-        if (progressResponse.ok) {
-          const progress = await progressResponse.json();
-          const currentProgress = progress.progress || 0;
-          
-          // Only update UI if progress has changed significantly (5% or more)
-          if (currentProgress >= lastProgressUpdate + 5) {
-            lastProgressUpdate = currentProgress;
-            setProcessingStatus(`Generating image: ${currentProgress}% - ${progress.message}`);
-            console.log("[DEBUG] Image generation progress:", progress);
-          }
-          
-          // Check if complete
-          if (progress.status === "completed") {
-            isComplete = true;
-            console.log("[DEBUG] Image generation completed, fetching result");
+  const generateStableDiffusionImage = async (prompt) => {
+    try {
+      setIsGeneratingImage(true);
+      setImageGenerationError(null);
+      setProcessingStatus("Starting image generation...");
+      Logger.info('Starting image generation', { prompt });
+  
+      if (cameraFeedRef.current?.setSpeechText) {
+        cameraFeedRef.current.setSpeechText(
+          "I'm generating a visualization based on your request. This may take a few minutes."
+        );
+      }
+  
+      // Initial request to start generation
+      const response = await fetch('http://localhost:5003/api/assembly/visualize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: prompt,
+          userId: getUserId(),
+          projectId: getProjectId()
+        }),
+        signal: AbortSignal.timeout(30000) // 30-second timeout for initial request
+      });
+  
+      const data = await response.json();
+      if (!data.success || !data.taskId) {
+        throw new Error(data.error || 'Failed to start image generation');
+      }
+  
+      const { taskId } = data;
+      setProcessingStatus("Generating image... (this may take a few minutes)");
+  
+      // Poll for progress
+      const pollProgress = async () => {
+        while (true) {
+          try {
+            const progressResponse = await fetch(`http://localhost:5003/api/assembly/visualize/progress/${taskId}`);
+            const progressData = await progressResponse.json();
+            const progress = progressData.progress || 0;
+            setProcessingStatus(`Generating image... (${progress}%)`);
             
-            try {
+            console.log("Progress data:", progressData); // Add debug logging
+            
+            if (progressData.status === 'completed') {
               // Fetch the final image
-              const resultResponse = await fetch(`http://localhost:9999/result/${taskId}`, {
-                headers: {
-                  'Cache-Control': 'no-cache',
-                  'Pragma': 'no-cache'
-                },
-                signal: AbortSignal.timeout(15000) // Longer timeout for final result
-              });
-              
-              if (resultResponse.ok) {
-                // Clean up any existing object URL
-                if (generatedImage) {
-                  URL.revokeObjectURL(generatedImage);
-                }
+              console.log("Generation completed, fetching image from:", 
+                `http://localhost:5003/api/assembly/visualize/result/${taskId}`);
                 
-                const blob = await resultResponse.blob();
+              const imageResponse = await fetch(`http://localhost:5003/api/assembly/visualize/result/${taskId}`);
+              console.log("Image response status:", imageResponse.status);
+              console.log("Image response content-type:", imageResponse.headers.get('content-type'));
+              
+              if (imageResponse.ok && imageResponse.headers.get('content-type')?.includes('image/')) {
+                const blob = await imageResponse.blob();
+                console.log("Image blob size:", blob.size);
                 const imageUrl = URL.createObjectURL(blob);
                 setGeneratedImage(imageUrl);
-                console.log("[DEBUG] Image generation successful, URL created:", imageUrl);
                 
-                // Add success message to speech
                 if (cameraFeedRef.current?.setSpeechText) {
                   cameraFeedRef.current.setSpeechText(
                     "I've completed generating the visualization based on your request."
                   );
                 }
                 
-                return; // Exit the function once image is successfully retrieved
+                // Important: break out of the polling loop
+                setIsGeneratingImage(false);
+                setProcessingStatus(null);
+                break;
               } else {
-                console.error(`[DEBUG] Failed to fetch result: ${resultResponse.status}`);
-                throw new Error(`Failed to fetch completed image: ${resultResponse.status}`);
+                // Log the error response
+                let errorText;
+                try {
+                  errorText = await imageResponse.text();
+                  console.error("Error response from image endpoint:", errorText);
+                } catch (e) {
+                  console.error("Could not read error response:", e);
+                }
+                throw new Error('Failed to fetch generated image: ' + errorText);
               }
-            } catch (resultError) {
-              console.error("[DEBUG] Error fetching result:", resultError);
-              // Don't give up immediately - we'll try again in the next iteration
-              isComplete = false;
+            } else if (progressData.error) {
+              throw new Error(progressData.error);
             }
+            
+            // Wait 5 seconds before polling again
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          } catch (error) {
+            console.error("Error in polling:", error);
+            setImageGenerationError(`Error during polling: ${error.message}`);
+            setIsGeneratingImage(false);
+            setProcessingStatus(null);
+            break;
           }
-        } else {
-          console.log(`[DEBUG] Progress check failed (${progressResponse.status})`);
         }
-      } catch (pollError) {
-        console.log("[DEBUG] Polling error:", pollError);
-        // Errors during polling are not fatal - we'll continue waiting
-      }
+      };
+  
+      pollProgress().catch(error => {
+        console.error("Error polling for progress:", error);
+        setImageGenerationError(`Error: ${error.message}`);
+        setIsGeneratingImage(false); // Make sure to turn off the loading state
+        setProcessingStatus(null);
+      });
       
-      // Wait before polling again
-      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL));
-    }
-    
-    // If we get here, we've either timed out or exhausted all attempts
-    if (!generatedImage) {
-      // One final attempt to get the result directly
-      try {
-        console.log("[DEBUG] Final attempt to get result after waiting");
-        
-        const finalResponse = await fetch(`http://localhost:9999/result/${taskId}`, {
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          },
-          signal: AbortSignal.timeout(15000)
-        });
-        
-        if (finalResponse.ok) {
-          const blob = await finalResponse.blob();
-          const imageUrl = URL.createObjectURL(blob);
-          setGeneratedImage(imageUrl);
-          console.log("[DEBUG] Final attempt was successful");
-          
-          if (cameraFeedRef.current?.setSpeechText) {
-            cameraFeedRef.current.setSpeechText(
-              "I've completed generating the visualization based on your request."
-            );
-          }
-          
-          return;
-        } else {
-          throw new Error("Image generation timed out or failed");
-        }
-      } catch (finalError) {
-        console.error("[DEBUG] Final attempt failed:", finalError);
-        throw new Error("Failed to retrieve the generated image after multiple attempts");
+    } catch (error) {
+      console.error("Image generation error:", error);
+      setImageGenerationError(`Error: ${error.message}`);
+      Logger.error('Error generating image:', error);
+      if (cameraFeedRef.current?.setSpeechText) {
+        cameraFeedRef.current.setSpeechText(
+          "I encountered an error while trying to generate the visualization."
+        );
       }
     }
-  } catch (error) {
-    console.error("[DEBUG] Image generation error:", error);
-    if (error.name === 'AbortError') {
-      setImageGenerationError('Image generation timed out. Please try again.');
-    } else {
-      setImageGenerationError(`Error: ${error.message}`);
-    }
-    Logger.error('Error generating image:', error);
-    
-    if (cameraFeedRef.current?.setSpeechText) {
-      cameraFeedRef.current.setSpeechText(
-        "I encountered an error while trying to generate the visualization."
-      );
-    }
-  } finally {
-    setProcessingStatus(null);
-    setIsGeneratingImage(false);
-  }
-};
+  }; 
 
 useEffect(() => {
   return () => {
@@ -387,6 +382,13 @@ useEffect(() => {
 }, []);
 
   const handleVoiceInput = async (transcript, statusCallback) => {
+    // Prevent processing if another operation is already in progress
+    if (isGeneratingImage) {
+      console.log("[DEBUG] Ignoring voice input because image generation is in progress");
+      statusCallback("Please wait for current image generation to complete");
+      return;
+    }
+    
     if (!cameraFeedRef.current) {
       Logger.error('Camera feed not initialized');
       statusCallback('Error: Camera not ready');

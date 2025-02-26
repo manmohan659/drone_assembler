@@ -381,6 +381,7 @@ They have provided an image for context (step ${currentStep}). Please:
 3) Keep the tone friendly, short, somewhat humorous but factual
 4) If user asks "can you identify/list down components so far," mention them from identifiedComponents
 5) Return JSON with NO markdown:
+6) If you see user asking for a drone image than reply him that feature is under development/beta will try to generate one be slighty funny about it
 
 {
   "status": "success|warning|error",

@@ -32,37 +32,40 @@ const generateVisualization = async (req, res) => {
   try {
     const { prompt, userId, projectId } = req.body;
     
-    Logger.info('Generating visualization', { userId, projectId, prompt });
+    // Generate a unique request ID for tracking
+    const requestId = `req-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    
+    Logger.info(`[${requestId}] Generating visualization`, { userId, projectId, prompt });
 
-    try {
-      // Attempt to call the stable diffusion service
-      const response = await axios.post('http://localhost:9999/generate', { 
-        prompt,
-        userId,
-        projectId
-      }, {
-        timeout: 120000, // 2 minute timeout
-        responseType: 'arraybuffer' // Important: we're expecting a binary image
+    // Make the initial request to start generation with async:true
+    const response = await axios.post('http://localhost:9999/generate', { 
+      prompt,
+      userId,
+      projectId,
+      async: true  // Use async mode to get a task ID
+    }, {
+      timeout: 30000, // 30 second timeout for initial request
+      headers: {
+        'X-Request-ID': requestId,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Parse the response data
+    const data = response.data;
+    
+    // Check if we got a task ID
+    if (data && data.task_id) {
+      // Return the task ID to the frontend
+      return res.json({
+        success: true,
+        taskId: data.task_id,
+        status: 'processing',
+        message: 'Image generation started'
       });
-      
-      Logger.info('Stable diffusion service responded successfully');
-      
-      // Return the image directly
-      res.set('Content-Type', 'image/jpeg');
-      return res.send(response.data);
-      
-    } catch (serviceError) {
-      Logger.error('Failed to call stable diffusion service:', serviceError);
-      
-      // If service call failed, return a placeholder
-      res.json({
-        success: false,
-        error: 'Image generation service unavailable',
-        image: '/api/placeholder/800/600',
-        description: prompt
-      });
+    } else {
+      throw new Error('No task ID returned from image service');
     }
-
   } catch (error) {
     Logger.error('Error generating visualization:', error);
     res.status(500).json({
@@ -71,5 +74,83 @@ const generateVisualization = async (req, res) => {
     });
   }
 };
+const checkImageProgress = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    
+    if (!taskId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing task ID'
+      });
+    }
+    
+    // Forward the request to the Janus service
+    const response = await axios.get(`http://localhost:9999/progress/${taskId}`, {
+      timeout: 10000
+    });
+    
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check progress: ' + error.message
+    });
+  }
+};
 
-module.exports = { startAssembly, getProgress, identifyComponents, generateVisualization };
+const getGeneratedImage = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    
+    if (!taskId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing task ID'
+      });
+    }
+    
+    console.log(`Getting generated image for task: ${taskId}`);
+    
+    // Forward the request to the Janus service
+    const response = await axios.get(`http://localhost:9999/result/${taskId}`, {
+      responseType: 'arraybuffer',
+      timeout: 30000 // Longer timeout for image retrieval
+    });
+    
+    // Check if we got an image response
+    if (response.headers['content-type'] && response.headers['content-type'].includes('image/')) {
+      console.log(`Successful image retrieval: ${response.headers['content-type']}, length: ${response.data.length}`);
+      
+      // Return the image directly
+      res.set('Content-Type', response.headers['content-type']);
+      return res.send(response.data);
+    } else {
+      // Try to parse the response as text/JSON if it's not an image
+      let errorText = '';
+      try {
+        errorText = Buffer.from(response.data).toString('utf8');
+      } catch (e) {
+        errorText = 'Could not parse response';
+      }
+      
+      console.error(`Invalid response from image service: ${errorText}`);
+      throw new Error('Invalid response from image service: ' + errorText);
+    }
+  } catch (error) {
+    console.error(`Error in getGeneratedImage: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get generated image: ' + error.message
+    });
+  }
+};
+
+module.exports = { 
+  startAssembly, 
+  getProgress, 
+  identifyComponents, 
+  generateVisualization,
+  checkImageProgress,   // Add this line
+  getGeneratedImage     // Add this line
+};

@@ -29,4 +29,6 @@ router.get('/project/:userId/:projectId/context', projectController.getProjectCo
 router.post('/project/identify-components', projectController.identifyAndStoreComponents);
 // Update the visualize route to expect prompt
 router.post('/visualize', assemblyController.generateVisualization);
+router.get('/visualize/progress/:taskId', assemblyController.checkImageProgress);
+router.get('/visualize/result/:taskId', assemblyController.getGeneratedImage);
 module.exports = router;

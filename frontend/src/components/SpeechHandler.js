@@ -3,14 +3,18 @@ import React, { useEffect, useCallback, useRef } from 'react';
 import Logger from '../utils/logger';
 
 const SpeechHandler = ({ text, onSpeechEnd, autoSpeak = true }) => {
-  // Use a ref to track if component is mounted
+  // Use refs to track if component is mounted
   const isMounted = useRef(true);
   // Track if we're currently speaking
   const isSpeaking = useRef(false);
-  // Track the current utterance's request ID to avoid duplicates
-  const currentRequestId = useRef(null);
+  // Store the current utterance
+  const currentUtterance = useRef(null);
   // Store last spoken text to avoid repeating the same text
   const lastSpokenText = useRef('');
+  // Use a queue for speech requests
+  const speechQueue = useRef([]);
+  // Debounce timer
+  const debounceTimer = useRef(null);
   
   // Process text to make it more suitable for speech
   const processTextForSpeech = (text) => {
@@ -87,10 +91,76 @@ const SpeechHandler = ({ text, onSpeechEnd, autoSpeak = true }) => {
       Logger.error('Error canceling speech:', e);
     }
     isSpeaking.current = false;
+    currentUtterance.current = null;
+    // Clear the queue when canceling
+    speechQueue.current = [];
   }, []);
 
-  // The speak function now uses a more reliable approach with duplicate prevention
-  const speak = useCallback((rawText) => {
+  // Process the speech queue
+  const processSpeechQueue = useCallback(() => {
+    // If already speaking or queue is empty, do nothing
+    if (isSpeaking.current || speechQueue.current.length === 0) {
+      return;
+    }
+
+    // Get the next speech item
+    const nextSpeech = speechQueue.current.shift();
+    
+    try {
+      // Set speaking state
+      isSpeaking.current = true;
+      
+      const utterance = new SpeechSynthesisUtterance(nextSpeech);
+      currentUtterance.current = utterance;
+      
+      // Log the speech start
+      Logger.info('Starting speech synthesis:', { 
+        text: nextSpeech.slice(0, 100) + (nextSpeech.length > 100 ? '...' : '')
+      });
+      
+      utterance.onend = () => {
+        Logger.info('Speech synthesis completed');
+        isSpeaking.current = false;
+        currentUtterance.current = null;
+        
+        // Process next item in queue if any
+        if (speechQueue.current.length > 0) {
+          setTimeout(processSpeechQueue, 100);
+        } else if (isMounted.current && onSpeechEnd) {
+          onSpeechEnd();
+        }
+      };
+      
+      utterance.onerror = (error) => {
+        Logger.error('Speech synthesis error:', error);
+        isSpeaking.current = false;
+        currentUtterance.current = null;
+        
+        // Process next item even if there's an error
+        if (speechQueue.current.length > 0) {
+          setTimeout(processSpeechQueue, 100);
+        }
+      };
+      
+      // Set rate slightly slower for better comprehension
+      utterance.rate = 0.9;
+      
+      // Start speaking
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      Logger.error('Failed to start speech synthesis:', error);
+      isSpeaking.current = false;
+      currentUtterance.current = null;
+      
+      // Process next item even if there's an error
+      if (speechQueue.current.length > 0) {
+        setTimeout(processSpeechQueue, 100);
+      }
+    }
+  }, [onSpeechEnd]);
+
+  // Add text to speech queue with debouncing
+  const queueSpeech = useCallback((rawText) => {
     if (!rawText) return;
     
     if (!initSpeechSynthesis()) return;
@@ -105,64 +175,24 @@ const SpeechHandler = ({ text, onSpeechEnd, autoSpeak = true }) => {
       return;
     }
     
-    // Generate a unique request ID for this speech request
-    const requestId = Date.now().toString();
+    // Update last spoken text
+    lastSpokenText.current = processedText;
     
-    // Always cancel any ongoing speech first 
-    cancelSpeech();
+    // Clear any existing debounce timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
     
-    // Short timeout to ensure cancel completes
-    setTimeout(() => {
-      try {
-        // Set speaking state and update tracking variables
-        isSpeaking.current = true;
-        currentRequestId.current = requestId;
-        lastSpokenText.current = processedText;
-        
-        const utterance = new SpeechSynthesisUtterance(processedText);
-        
-        // Add unique identifier 
-        utterance.requestId = requestId;
-        
-        // Log the speech start
-        Logger.info('Starting speech synthesis:', { 
-          processedText: processedText.slice(0, 100) + (processedText.length > 100 ? '...' : ''),
-          requestId
-        });
-        
-        utterance.onend = () => {
-          // Only process end event for the current request
-          if (utterance.requestId === currentRequestId.current) {
-            Logger.info('Speech synthesis completed', { requestId: utterance.requestId });
-            isSpeaking.current = false;
-            currentRequestId.current = null;
-            if (isMounted.current && onSpeechEnd) onSpeechEnd();
-          } else {
-            Logger.info('Ignoring completed event for outdated speech request', { 
-              requestId: utterance.requestId,
-              currentRequestId: currentRequestId.current
-            });
-          }
-        };
-        
-        utterance.onerror = (error) => {
-          Logger.error('Speech synthesis error:', error);
-          isSpeaking.current = false;
-          currentRequestId.current = null;
-        };
-        
-        // Set rate slightly slower for better comprehension
-        utterance.rate = 0.9;
-        
-        // Start speaking
-        window.speechSynthesis.speak(utterance);
-      } catch (error) {
-        Logger.error('Failed to start speech synthesis:', error);
-        isSpeaking.current = false;
-        currentRequestId.current = null;
-      }
-    }, 100);
-  }, [initSpeechSynthesis, cancelSpeech, onSpeechEnd]);
+    // Set a new debounce timer
+    debounceTimer.current = setTimeout(() => {
+      // Cancel any ongoing speech
+      cancelSpeech();
+      
+      // Add to queue and process
+      speechQueue.current.push(processedText);
+      processSpeechQueue();
+    }, 300); // 300ms debounce
+  }, [initSpeechSynthesis, cancelSpeech, processSpeechQueue]);
 
   // Effect for initial speech and cleanup
   useEffect(() => {
@@ -177,26 +207,24 @@ const SpeechHandler = ({ text, onSpeechEnd, autoSpeak = true }) => {
       isMounted.current = false;
       // Cancel any ongoing speech when component unmounts
       cancelSpeech();
+      // Clear any pending timers
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
     };
   }, [initSpeechSynthesis, cancelSpeech]);
 
   // Effect to handle text changes with proper cleanup
   useEffect(() => {
     if (autoSpeak && text) {
-      // If text changed, cancel any current speech and speak the new text
-      cancelSpeech();
-      
-      // Small delay to ensure cancellation is complete
-      setTimeout(() => {
-        speak(text);
-      }, 150);
+      queueSpeech(text);
     }
     
     // If text is cleared, cancel any ongoing speech
     if (!text) {
       cancelSpeech();
     }
-  }, [text, autoSpeak, speak, cancelSpeech]);
+  }, [text, autoSpeak, queueSpeech, cancelSpeech]);
 
   return null; // This is a non-visual component
 };

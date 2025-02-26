@@ -1,6 +1,6 @@
 // frontend/src/components/VoiceInput.js
-import React, { useState, useCallback, useEffect } from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Mic, MicOff, Send } from 'lucide-react';
 import Logger from '../utils/logger';
 
 const VoiceInput = ({ onVoiceInput, disabled = false }) => {
@@ -9,46 +9,28 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
   const [recognition, setRecognition] = useState(null);
   const [error, setError] = useState(null);
   const [processingStatus, setProcessingStatus] = useState(null);
-  const [silenceTimer, setSilenceTimer] = useState(null);
-  const [lastResultTime, setLastResultTime] = useState(null);
-  const [finalTranscript, setFinalTranscript] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Function to restart listening if it stops unexpectedly
-  const restartRecognition = useCallback(() => {
-    if (recognition && isListening && !isSubmitting) {
-      try {
-        console.log("[DEBUG] Attempting to restart voice recognition");
-        recognition.start();
-      } catch (error) {
-        console.error("[DEBUG] Error restarting recognition:", error);
-        // If we can't restart, create a new instance
-        startListening();
-      }
-    }
-  }, [recognition, isListening, isSubmitting]);
-
-  // Check for long silence and submit if needed
-  const checkSilence = useCallback(() => {
-    if (isListening && lastResultTime) {
-      const silenceTime = Date.now() - lastResultTime;
-      if (silenceTime > 2000 && transcript && transcript !== 'Listening...' && !isSubmitting) {
-        console.log("[DEBUG] Detected silence, submitting transcript:", transcript);
-        submitTranscript(transcript);
-      }
-    }
-  }, [isListening, lastResultTime, transcript, isSubmitting]);
+  // References to track recognition state
+  const recognitionRef = useRef(null);
+  const transcriptRef = useRef('');
+  const isListeningRef = useRef(false);
+  
+  // Update refs when state changes
+  useEffect(() => {
+    transcriptRef.current = transcript;
+    isListeningRef.current = isListening;
+    recognitionRef.current = recognition;
+  }, [transcript, isListening, recognition]);
 
   // Function to submit the final transcript
   const submitTranscript = useCallback((text) => {
     if (isSubmitting || !text || text === 'Listening...') return;
     
+    // Prevent multiple submissions
     setIsSubmitting(true);
     setProcessingStatus('Processing voice input...');
     Logger.voiceCapture(text);
-    
-    // Store the final transcript
-    setFinalTranscript(text);
     
     // Pass the transcript to parent component
     onVoiceInput(text, (status) => {
@@ -58,7 +40,7 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         setTranscript('');
         setProcessingStatus(null);
         setIsSubmitting(false);
-      }, 5000);
+      }, 2000);
     });
   }, [onVoiceInput, isSubmitting]);
 
@@ -69,24 +51,21 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         throw new Error('Speech recognition is not supported in this browser');
       }
 
-      // Clear any previous state
-      if (recognition) {
+      // Stop any existing recognition instance
+      if (recognitionRef.current) {
         try {
-          recognition.stop();
+          recognitionRef.current.stop();
         } catch (e) {
           console.log("Recognition already stopped");
         }
       }
       
-      if (silenceTimer) {
-        clearInterval(silenceTimer);
-      }
-
       const recognitionInstance = new SpeechRecognition();
       
-      // Enable continuous mode for smoother experience
-      recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
+      // Important: Don't use continuous mode - this causes multiple rapid transcripts
+      recognitionInstance.continuous = false;
+      // Only return final results - prevents partial transcript processing
+      recognitionInstance.interimResults = false;
       recognitionInstance.lang = 'en-US';
       recognitionInstance.maxAlternatives = 1;
 
@@ -96,38 +75,14 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         setError(null);
         setTranscript('Listening...');
         setProcessingStatus(null);
-        setLastResultTime(Date.now());
-        
-        // Start silence detection interval
-        const timer = setInterval(checkSilence, 500);
-        setSilenceTimer(timer);
       };
 
       recognitionInstance.onresult = (event) => {
-        setLastResultTime(Date.now());
+        const result = event.results[0][0].transcript;
+        setTranscript(result);
         
-        // Build transcript from all results
-        let currentTranscript = '';
-        let isFinal = false;
-        
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          currentTranscript += result[0].transcript;
-          
-          if (result.isFinal) {
-            isFinal = true;
-          }
-        }
-        
-        // If we have a transcript, update it
-        if (currentTranscript) {
-          setTranscript(currentTranscript);
-        }
-        
-        // If this is explicitly marked as final or we have a long enough transcript
-        if (isFinal || (currentTranscript.length > 10 && !event.results[event.results.length-1].isFinal)) {
-          submitTranscript(currentTranscript);
-        }
+        // Don't auto-submit - we'll wait for the user to click the submit button
+        // or for onend to be called naturally
       };
 
       recognitionInstance.onerror = (event) => {
@@ -137,49 +92,24 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
           return;
         }
         
-        // For "aborted" errors, try to restart
-        if (event.error === 'aborted' && isListening) {
-          console.log("[DEBUG] Recognition aborted, attempting to restart");
-          setTimeout(restartRecognition, 300);
-          return;
-        }
-        
         Logger.error('Voice recognition error:', event.error);
         setError(`Error: ${event.error}`);
         setIsListening(false);
-        
-        // Try to restart for recoverable errors
-        if (event.error === 'network' || event.error === 'service-not-allowed') {
-          console.log("[DEBUG] Recoverable error, attempting to restart");
-          setTimeout(startListening, 1000);
-        }
       };
 
       recognitionInstance.onend = () => {
-        console.log("[DEBUG] Recognition ended, isListening:", isListening);
+        console.log("[DEBUG] Recognition ended naturally");
         
-        // If we're still supposed to be listening, try to restart
-        if (isListening && !isSubmitting) {
-          console.log("[DEBUG] Recognition ended while still listening, restarting");
-          setTimeout(restartRecognition, 300);
-        } else {
-          // Normal end of recognition
-          Logger.info('Voice recognition ended');
-          setIsListening(false);
-          
-          // If we have a transcript but haven't submitted it yet, submit it now
-          if (transcript && transcript !== 'Listening...' && !isSubmitting && !finalTranscript) {
-            submitTranscript(transcript);
-          } else if (!error && !processingStatus && !isSubmitting) {
-            setProcessingStatus('Processing...');
-          }
-          
-          // Clean up silence timer
-          if (silenceTimer) {
-            clearInterval(silenceTimer);
-            setSilenceTimer(null);
-          }
+        // Submit transcript if we have one and we didn't manually stop
+        if (transcriptRef.current && 
+            transcriptRef.current !== 'Listening...' && 
+            !isSubmitting && 
+            isListeningRef.current) {
+          submitTranscript(transcriptRef.current);
         }
+        
+        setIsListening(false);
+        Logger.info('Voice recognition ended');
       };
 
       setRecognition(recognitionInstance);
@@ -188,7 +118,7 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
       Logger.error('Failed to initialize voice recognition:', error);
       setError(error.message);
     }
-  }, [onVoiceInput, recognition, isListening, transcript, silenceTimer, checkSilence, submitTranscript, finalTranscript, isSubmitting, restartRecognition]);
+  }, [submitTranscript, isSubmitting]);
 
   const stopListening = useCallback(() => {
     if (recognition) {
@@ -200,14 +130,21 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
       if (transcript && transcript !== 'Listening...' && !isSubmitting) {
         submitTranscript(transcript);
       }
-      
-      // Clean up silence timer
-      if (silenceTimer) {
-        clearInterval(silenceTimer);
-        setSilenceTimer(null);
-      }
     }
-  }, [recognition, transcript, isSubmitting, silenceTimer, submitTranscript]);
+  }, [recognition, transcript, isSubmitting, submitTranscript]);
+  
+  // Manual submit button handler
+  const handleManualSubmit = useCallback(() => {
+    if (transcript && transcript !== 'Listening...' && !isSubmitting) {
+      // Stop listening first if needed
+      if (isListening && recognition) {
+        recognition.stop();
+        setIsListening(false);
+      }
+      
+      submitTranscript(transcript);
+    }
+  }, [transcript, isSubmitting, isListening, recognition, submitTranscript]);
 
   useEffect(() => {
     return () => {
@@ -215,17 +152,12 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         recognition.stop();
         Logger.info('Voice recognition cleanup on unmount');
       }
-      
-      // Clean up silence timer on unmount
-      if (silenceTimer) {
-        clearInterval(silenceTimer);
-      }
     };
-  }, [recognition, silenceTimer]);
+  }, [recognition]);
 
   return (
     <div className="flex flex-col items-end gap-2">
-      {/* Enhanced status display with typewriter effect for transcript */}
+      {/* Status display with typewriter effect for transcript */}
       {(transcript || processingStatus) && (
         <div className={`bg-black/70 backdrop-blur-sm rounded-lg px-4 py-3 text-white text-sm max-w-xs 
           ${transcript && transcript !== 'Listening...' ? 'border-l-4 border-indigo-500' : ''}
@@ -260,7 +192,7 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
           {/* Speech guidance */}
           {isListening && transcript === 'Listening...' && (
             <div className="mt-2 text-xs text-indigo-300 italic">
-              Speak clearly into your microphone
+              Speak clearly, then click Stop when finished
             </div>
           )}
           
@@ -270,10 +202,26 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
               <div className="bg-indigo-500 h-1 rounded-full animate-progress"></div>
             </div>
           )}
+          
+          {/* Manual submit button - only show when we have a transcript and are not processing */}
+          {transcript && 
+           transcript !== 'Listening...' && 
+           !isSubmitting && 
+           !isListening && (
+            <div className="mt-2 flex justify-end">
+              <button
+                onClick={handleManualSubmit}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1"
+              >
+                <Send className="w-3 h-3" />
+                Submit
+              </button>
+            </div>
+          )}
         </div>
       )}
       
-      {/* Improved error display */}
+      {/* Error display */}
       {error && (
         <div className="bg-red-900/70 backdrop-blur-sm rounded-lg px-4 py-3 text-white text-sm max-w-xs border-l-4 border-red-600">
           <div className="flex items-center gap-2">
@@ -292,21 +240,21 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         </div>
       )}
       
-      {/* Enhanced voice input button */}
+      {/* Voice input button */}
       <button
         onClick={isListening ? stopListening : startListening}
-        disabled={disabled}
+        disabled={disabled || isSubmitting}
         className={`w-16 h-16 rounded-full flex items-center justify-center text-white shadow-lg transition-all relative ${
           isListening 
             ? 'bg-red-600 hover:bg-red-700 scale-110' 
             : 'bg-purple-600 hover:bg-purple-700'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-        title={isListening ? 'Stop listening (your speech will be processed)' : 'Start voice input'}
+        } ${disabled || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+        title={isListening ? 'Stop listening and process speech' : 'Start voice input'}
         aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
       >
         {isListening ? <MicOff className="w-7 h-7" /> : <Mic className="w-7 h-7" />}
         
-        {/* Enhanced listening animation */}
+        {/* Listening animation */}
         {isListening && (
           <>
             <div className="absolute inset-0 rounded-full border-4 border-red-400 animate-ping" />
@@ -316,7 +264,7 @@ const VoiceInput = ({ onVoiceInput, disabled = false }) => {
         
         {/* Helper label */}
         <div className="absolute -bottom-7 text-xs font-medium text-white bg-black/50 rounded-full px-2 py-0.5 whitespace-nowrap">
-          {isListening ? 'Stop & Process' : 'Speak'}
+          {isListening ? 'Stop' : 'Speak'}
         </div>
       </button>
     </div>

@@ -79,11 +79,27 @@ def generate_picture(user_prompt: str, task_id=None):
     
     If task_id is provided, progress is tracked and can be queried.
     """
-    global generation_tasks
+    global generation_tasks, vl_gpt, vl_chat_processor
     
-    # Ensure model is loaded
-    if vl_gpt is None or vl_chat_processor is None:
-        load_model()
+    # Get a reference to the device and processor first to avoid race conditions
+    # This is critical for thread safety
+    try:
+        # Ensure model is loaded BEFORE we do anything else
+        if vl_gpt is None or vl_chat_processor is None:
+            print("Model not loaded yet, loading now...")
+            load_model()
+            if vl_gpt is None or vl_chat_processor is None:
+                raise Exception("Failed to load model")
+        
+        # Make thread-local references to the model
+        current_model = vl_gpt
+        current_processor = vl_chat_processor
+        
+        # Add some info about which request we're processing
+        print(f"Processing generation request for: '{user_prompt[:50]}...' (task_id: {task_id})")
+    except Exception as e:
+        print(f"Error preparing model: {e}")
+        raise
     
     # Update task status if task_id provided
     if task_id:
@@ -119,12 +135,12 @@ def generate_picture(user_prompt: str, task_id=None):
                 "timestamp": time.time()
             })
         
-    sft_format = vl_chat_processor.apply_sft_template_for_multi_turn_prompts(
+    sft_format = current_processor.apply_sft_template_for_multi_turn_prompts(
         conversations=conversation,
-        sft_format=vl_chat_processor.sft_format,
+        sft_format=current_processor.sft_format,
         system_prompt="",
     )
-    prompt = sft_format + vl_chat_processor.image_start_tag
+    prompt = sft_format + current_processor.image_start_tag
 
     @torch.inference_mode()
     def generate_cpu(
@@ -139,7 +155,10 @@ def generate_picture(user_prompt: str, task_id=None):
             img_size: int = 384,
             patch_size: int = 16,
     ):
-        print("Tokenizing input...")
+        # Create a unique ID for this generation process to track in logs
+        generation_id = f"gen-{task_id if task_id else 'sync'}-{int(time.time())}"
+        print(f"[{generation_id}] Tokenizing input...")
+        
         if task_id:
             with tasks_lock:
                 generation_tasks[task_id].update({
@@ -157,7 +176,7 @@ def generate_picture(user_prompt: str, task_id=None):
         tokens[1, :] = input_ids.clone()
         tokens[1, 1:-1] = vl_chat_processor.pad_id  # Unconditional
 
-        print("Generating image tokens...")
+        print(f"[{generation_id}] Generating image tokens...")
         if task_id:
             with tasks_lock:
                 generation_tasks[task_id].update({
@@ -171,11 +190,17 @@ def generate_picture(user_prompt: str, task_id=None):
         generated_tokens = torch.zeros((1, image_token_num_per_image), dtype=torch.int).to(device)
 
         outputs = None
+        last_progress_update = 0
+        
         for i in range(image_token_num_per_image):
-            # Only update progress every 10% or every 50 tokens, whichever comes first
-            should_update = (i % 50 == 0) or (i * 100 / image_token_num_per_image) % 10 < 1
-            if should_update:
-                print(f"Generating token {i}/{image_token_num_per_image}...")
+            # Only update progress when the percentage has changed significantly
+            # This reduces the number of log messages and potential for confusion
+            current_percentage = int(100 * (i / image_token_num_per_image))
+            
+            if current_percentage > last_progress_update + 4:  # Update every 5% progress
+                last_progress_update = current_percentage
+                print(f"[{generation_id}] Generating token {i}/{image_token_num_per_image}... ({current_percentage}%)")
+                
                 if task_id:
                     # Scale progress from 15% to 85% based on token generation
                     progress = 15 + int(70 * (i / image_token_num_per_image))
@@ -256,9 +281,21 @@ def generate_picture(user_prompt: str, task_id=None):
             
         return save_path
 
-    device = next(vl_gpt.parameters()).device
-    image_path = generate_cpu(vl_gpt, vl_chat_processor, prompt, task_id=task_id, parallel_size=1)
+    # Use local references to the model that are thread-safe
+    device = next(current_model.parameters()).device
+    
+    # Add a lock to prevent multiple concurrent token generations
+    # This is a critical section that can't be parallelized effectively on CPU
+    with generation_lock:
+        print(f"Starting image generation process for task {task_id if task_id else 'synchronous'}")
+        image_path = generate_cpu(current_model, current_processor, prompt, task_id=task_id, parallel_size=1)
+        print(f"Completed image generation for task {task_id if task_id else 'synchronous'}")
+    
     return image_path
+    
+# Global lock for token generation process
+# This ensures only one image is being generated at a time
+generation_lock = threading.Lock()
 
 
 # Add a root route for health checks
@@ -388,17 +425,26 @@ def generate():
         # Handle preflight request
         response = app.make_default_options_response()
         return response
-        
+    
+    # Check if we're already generating an image (for synchronous mode)
+    if not generation_lock.acquire(blocking=False):
+        print("⚠️ Generation already in progress, returning busy status")
+        return jsonify({
+            "error": "Image generation already in progress. Please try again after current generation completes.",
+            "status": "busy"
+        }), 429
+    
+    # Release the lock - we'll acquire it again in generate_picture if needed
+    generation_lock.release()
+    
     try:
         data = request.get_json()
         if not data or 'prompt' not in data:
             return jsonify({"error": "Missing 'prompt' in request data."}), 400
 
         user_prompt = data['prompt']
-        print(f"Received image generation request: '{user_prompt[:50]}...'")
-        
-        # Get the priority flag - if set to true, this task will run with fewer progress updates
-        patient_mode = data.get('patient', False)
+        request_id = request.headers.get('X-Request-ID', 'none')
+        print(f"Received image generation request: '{user_prompt[:50]}...' (Request ID: {request_id})")
         
         # Log additional data if provided (but don't require it)
         if 'userId' in data:
@@ -406,26 +452,25 @@ def generate():
         if 'projectId' in data:
             print(f"Project ID: {data['projectId']}")
         
-        # Create a task ID for tracking progress
-        task_id = str(uuid.uuid4())
-        
-        # Create the task entry first to avoid race conditions
-        with tasks_lock:
-            generation_tasks[task_id] = {
-                "status": "pending",
-                "progress": 0,
-                "message": "Task created, waiting to start",
-                "timestamp": time.time(),
-                "prompt": user_prompt[:50] + "..." if len(user_prompt) > 50 else user_prompt,
-                "patient_mode": patient_mode
-            }
-        
-        # Check if 'async' parameter is set, default to true
+        # Check if direct synchronous response is requested
         use_async = data.get('async', True)
         
         if use_async:
-            # Start generation in a separate thread
-            import threading
+            # Create a task ID for tracking progress
+            task_id = str(uuid.uuid4())
+            
+            # Create the task entry first to avoid race conditions
+            with tasks_lock:
+                generation_tasks[task_id] = {
+                    "status": "pending",
+                    "progress": 0,
+                    "message": "Task created, waiting to start",
+                    "timestamp": time.time(),
+                    "prompt": user_prompt[:50] + "..." if len(user_prompt) > 50 else user_prompt,
+                    "request_id": request_id
+                }
+            
+            # Start generation in a separate thread - ONLY ONE thread per request
             thread = threading.Thread(
                 target=generate_picture,
                 args=(user_prompt, task_id),
@@ -433,27 +478,63 @@ def generate():
             )
             thread.start()
             
+            # Return only one task ID
             return jsonify({
                 "task_id": task_id,
                 "status": "processing",
                 "message": "Image generation started",
                 "progress_url": f"/progress/{task_id}",
                 "result_url": f"/result/{task_id}",
-                "status_url": f"/status/{task_id}"  # New combined endpoint
+                "status_url": f"/status/{task_id}"
             })
         else:
-            # Run synchronously (old behavior)
-            image_path = generate_picture(user_prompt)
-            return send_file(image_path, mimetype='image/jpeg')
+            # Run synchronously (the way test_service.py uses it)
+            # This is faster because it doesn't create multiple images
+            if generation_lock.acquire(blocking=False):
+                try:
+                    print(f"Starting synchronous image generation for request: {request_id}")
+                    image_path = generate_picture(user_prompt)
+                    print(f"Completed synchronous image generation for request: {request_id}")
+                    return send_file(image_path, mimetype='image/jpeg')
+                finally:
+                    generation_lock.release()
+            else:
+                print(f"⚠️ Could not acquire generation lock for synchronous request: {request_id}")
+                return jsonify({
+                    "error": "Image generation already in progress. Please try again after current generation completes.",
+                    "status": "busy"
+                }), 429
     except Exception as e:
         import traceback
         print(f"Error during generation: {e}")
         print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "error": str(e),
+            "request_id": request.headers.get('X-Request-ID', 'none')
+        }), 500
 
 
+
+def preload_model_in_background():
+    """
+    Preload the model in a background thread to make first image generation faster.
+    This is especially helpful if the frontend makes a request before the model is loaded.
+    """
+    def _preload():
+        print("Preloading model in background...")
+        try:
+            load_model()
+            print("✅ Model preloaded successfully!")
+        except Exception as e:
+            print(f"❌ Error preloading model: {e}")
+    
+    import threading
+    thread = threading.Thread(target=_preload, daemon=True)
+    thread.start()
+    return thread
 
 if __name__ == '__main__':
     print("Janus Image Generation service starting on port 9999...")
-    print("Note: Model will be loaded on the first image generation request")
+    # Start preloading model as soon as the server starts
+    preload_thread = preload_model_in_background()
     app.run(host='0.0.0.0', port=9999, debug=False, threaded=True)
